@@ -17,11 +17,9 @@ helper('pushes', function (client) {
 
     readable.originalPush = readable.push
     readable.push = function (data) {
-      if (!shouldPushAgain && !(shouldPushAgain = this.originalPush(data))) {
-        assert(false)
-      } else {
-        return (shouldPushAgain = this.originalPush(data))
-      }
+      assert(shouldPushAgain)
+      shouldPushAgain = this.originalPush(data)
+      return shouldPushAgain
     }
 
     writable._write = function (chunk, encoding, callback) {
