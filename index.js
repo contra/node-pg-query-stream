@@ -38,7 +38,7 @@ class PgQueryStream extends Readable {
     var readAmount = Math.max(size, this.batchSize)
     var object
 
-    while (object = this._buffer.shift() && readAmount) {
+    while ((object = this._buffer.shift()) && readAmount) {
       readAmount--;
       if (!this.push(object)) {
         this._reading = false
