@@ -8,7 +8,7 @@ require('./helper')('stream tester', function (client) {
     var query = client.query(stream)
     spec(query)
       .readable()
-      .pausable({strict: true})
+      .pausable({ strict: true })
       .validateOnExit()
     stream.on('end', done)
   })

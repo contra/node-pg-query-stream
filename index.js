@@ -8,6 +8,7 @@ class PgQueryStream extends Readable {
     this.cursor = new Cursor(text, values)
     this._reading = false
     this._closed = false
+    this._buffer = []
     this.batchSize = (options || {}).batchSize || 100
 
     // delegate Submittable callbacks to cursor
@@ -34,7 +35,17 @@ class PgQueryStream extends Readable {
       return false
     }
     this._reading = true
-    const readAmount = Math.max(size, this.batchSize)
+    var readAmount = Math.max(size, this.batchSize)
+    var object
+
+    while ((object = this._buffer.shift())) {
+      readAmount--
+      if (!this.push(object)) {
+        this._reading = false
+        return
+      }
+    }
+
     this.cursor.read(readAmount, (err, rows) => {
       if (this._closed) {
         return
@@ -51,8 +62,11 @@ class PgQueryStream extends Readable {
 
       // push each row into the stream
       this._reading = false
-      for (var i = 0; i < rows.length; i++) {
-        this.push(rows[i])
+      while ((object = rows.shift())) {
+        if (!this.push(object)) {
+          this._buffer = this._buffer.concat(rows)
+          return
+        }
       }
     })
   }
