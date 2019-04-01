@@ -4,12 +4,13 @@ var Readable = require('stream').Readable
 
 class PgQueryStream extends Readable {
   constructor (text, values, options) {
-    super(Object.assign({ objectMode: true }, options))
+    var batchSize = (options || {}).batchSize || 100
+    super(Object.assign({ objectMode: true, highWaterMark: batchSize }, options))
     this.cursor = new Cursor(text, values)
     this._reading = false
     this._closed = false
     this._buffer = []
-    this.batchSize = (options || {}).batchSize || 100
+    this.batchSize = batchSize
 
     // delegate Submittable callbacks to cursor
     this.handleRowDescription = this.cursor.handleRowDescription.bind(this.cursor)
@@ -39,7 +40,7 @@ class PgQueryStream extends Readable {
     var object
 
     while ((object = this._buffer.shift()) && readAmount) {
-      readAmount--;
+      readAmount--
       if (!this.push(object)) {
         this._reading = false
         return
@@ -61,7 +62,6 @@ class PgQueryStream extends Readable {
       // if we get a 0 length array we've read to the end of the cursor
       if (!rows.length) {
         this._closed = true
-        setImmediate(() => this.emit('close'))
         return this.push(null)
       }
 

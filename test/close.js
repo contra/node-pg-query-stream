@@ -1,6 +1,4 @@
 var assert = require('assert')
-var concat = require('concat-stream')
-
 var QueryStream = require('../')
 var helper = require('./helper')
 
