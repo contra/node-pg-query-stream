@@ -2,15 +2,6 @@ var assert = require('assert')
 var QueryStream = require('../')
 var helper = require('./helper')
 
-helper('close', function (client) {
-  it('emits close', function (done) {
-    var stream = new QueryStream('SELECT * FROM generate_series(0, $1) num', [3], { batchSize: 2, highWaterMark: 2 })
-    var query = client.query(stream)
-    query.pipe(concat(function () {}))
-    query.on('close', done)
-  })
-})
-
 helper('early close', function (client) {
   it('can be closed early', function (done) {
     var stream = new QueryStream('SELECT * FROM generate_series(0, $1) num', [20000], {
